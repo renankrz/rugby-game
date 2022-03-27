@@ -29,7 +29,6 @@ typedef enum {
 } Way;
 
 struct strategy {
-  StrategyType type;
   char *name;
   int rounds_left;
   direction_t forbidden_dir;
@@ -38,10 +37,10 @@ struct strategy {
 };
 typedef struct strategy Strategy;
 
-#define INIT_ZIGZAG   { ZIGZAG, "ZIGZAG", 0, DIR_STAY, DIR_STAY, RANDOM }
-#define INIT_VERTICAL { VERTICAL, "VERTICAL", 1, DIR_STAY, DIR_STAY, RANDOM }
-#define INIT_TRIANGLE { TRIANGLE, "TRIANGLE", 4, DIR_STAY, DIR_STAY, RANDOM }
-#define INIT_SQUARE   { SQUARE, "SQUARE", RAND_MAX, DIR_STAY, DIR_STAY, RANDOM }
+#define INIT_ZIGZAG   { "ZIGZAG", 0, DIR_STAY, DIR_STAY, RANDOM }
+#define INIT_VERTICAL { "VERTICAL", 1, DIR_STAY, DIR_STAY, RANDOM }
+#define INIT_TRIANGLE { "TRIANGLE", 4, DIR_STAY, DIR_STAY, RANDOM }
+#define INIT_SQUARE   { "SQUARE", RAND_MAX, DIR_STAY, DIR_STAY, RANDOM }
 
 const Strategy init_strategies[] = {
   INIT_ZIGZAG, INIT_VERTICAL, INIT_TRIANGLE, INIT_SQUARE
@@ -348,7 +347,7 @@ direction_t execute_attacker_strategy(
   bool is_locked = equal_positions(current_pos, last_pos);
   bool got_locked_recently = rounds_free < 5;
   rounds_free = is_locked ? 0 : rounds_free + 1;
-  bool has_strategy_finished = strategy.type != ZIGZAG && strategy.rounds_left == 0;
+  bool has_strategy_finished = strategy_type != ZIGZAG && strategy.rounds_left == 0;
   bool is_time_to_spy = !already_spied && (current_pos.j == 6 || round == 30);
 
   // Spy
@@ -431,7 +430,7 @@ direction_t execute_attacker_strategy(
     strategy.way = way;
   }
   // Update strategy if we're stuck
-  else if (is_locked && strategy.type != SQUARE) {
+  else if (is_locked && strategy_type != SQUARE) {
     update_strategy_type(&strategy_type, &max_strategy_type, got_locked_recently);
     strategy = init_strategies[strategy_type];
     strategy.forbidden_dir = last_dir;
