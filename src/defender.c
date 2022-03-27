@@ -10,9 +10,6 @@
 // Main header
 #include "defender.h"
 
-// Macros
-#define UNUSED(x) (void)(x) // Auxiliary to avoid error of unused parameter
-
 /*----------------------------------------------------------------------------*/
 /*                          STRATEGIES DEFINITIONS                            */
 /*----------------------------------------------------------------------------*/
@@ -105,8 +102,9 @@ void def_print_strategy(Strategy *s) {
 /*----------------------------------------------------------------------------*/
 
 bool def_is_same_dir(direction_t dir_1, direction_t dir_2) {
-  if (dir_1.i == dir_2.i && dir_1.j == dir_2.j)
+  if (dir_1.i == dir_2.i && dir_1.j == dir_2.j) {
     return true;
+  }
   return false;
 }
 
@@ -161,10 +159,6 @@ void apply_forward(direction_t *dir, Strategy *s) {
 
 direction_t execute_defender_strategy(
     position_t current_pos, Spy attacker_spy) {
-  // TODO: unused parameters, remove these lines later
-  UNUSED(current_pos);
-  UNUSED(attacker_spy);
-
   // Game
   static int round = 1;
 
@@ -280,7 +274,6 @@ direction_t execute_defender_strategy(
   last_dir = dir;
 
   round++;
-
   return dir;
 }
 
