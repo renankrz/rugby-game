@@ -50,7 +50,7 @@ const Strategy init_atk_strategies[] = {
 /*                                    UTIL                                    */
 /*----------------------------------------------------------------------------*/
 
-void print_dir(direction_t dir) {
+void atk_print_dir(direction_t dir) {
   switch (dir.i) {
   case -1:
     switch (dir.j) {
@@ -96,11 +96,11 @@ void print_dir(direction_t dir) {
   }
 }
 
-void print_pos(position_t pos) {
+void atk_print_pos(position_t pos) {
   printf("i = %lu | j = %lu\n", pos.i, pos.j);
 }
 
-void print_way(Way way) {
+void atk_print_way(Way way) {
   if (way == CLOCKWISE) {
     printf("clockwise\n");
   } else {
@@ -108,13 +108,13 @@ void print_way(Way way) {
   }
 }
 
-void print_strategy(Strategy *s) {
+void atk_print_strategy(Strategy *s) {
   printf("--------------------\n");
   printf("[STRATEGY] %s\n", s->name);
   printf("forbidden dir: ");
-  print_dir(s->forbidden_dir);
+  atk_print_dir(s->forbidden_dir);
   printf("way: ");
-  print_way(s->way);
+  atk_print_way(s->way);
   printf("%d rounds left\n", s->rounds_left);
   printf("--------------------\n");
 }
@@ -123,60 +123,60 @@ void print_strategy(Strategy *s) {
 /*                            PRIVATE FUNCTIONS                               */
 /*----------------------------------------------------------------------------*/
 
-bool is_same_dir(direction_t dir_1, direction_t dir_2) {
+bool atk_is_same_dir(direction_t dir_1, direction_t dir_2) {
   if (dir_1.i == dir_2.i && dir_1.j == dir_2.j)
     return true;
   return false;
 }
 
-void set_pos(position_t *target_pos, position_t source_pos) {
+void atk_set_pos(position_t *target_pos, position_t source_pos) {
   target_pos->i = source_pos.i;
   target_pos->j = source_pos.j;
 }
 
-void set_dir(direction_t *target_dir, direction_t source_dir) {
+void atk_set_dir(direction_t *target_dir, direction_t source_dir) {
   target_dir->i = source_dir.i;
   target_dir->j = source_dir.j;
 }
 
-void set_way(Way *way, direction_t dir) {
-  if (is_same_dir(dir, (direction_t) DIR_UP)
-    || is_same_dir(dir, (direction_t) DIR_UP_RIGHT)) {
+void atk_set_way(Way *way, direction_t dir) {
+  if (atk_is_same_dir(dir, (direction_t) DIR_UP)
+    || atk_is_same_dir(dir, (direction_t) DIR_UP_RIGHT)) {
     *way = CLOCKWISE;
-  } else if (is_same_dir(dir, (direction_t) DIR_DOWN_RIGHT)
-    || is_same_dir(dir, (direction_t) DIR_DOWN)) {
+  } else if (atk_is_same_dir(dir, (direction_t) DIR_DOWN_RIGHT)
+    || atk_is_same_dir(dir, (direction_t) DIR_DOWN)) {
     *way = COUNTERCLOCKWISE;
   }
 }
 
-void set_rand_dir(direction_t *rand_dir, Way way) {
+void atk_set_rand_dir(direction_t *rand_dir, Way way) {
   int k = rand();
   if (way == CLOCKWISE) {
     if (k > RAND_MAX / 3) {
       // RIGHT a 67%
-      set_dir(rand_dir, (direction_t) DIR_RIGHT);
+      atk_set_dir(rand_dir, (direction_t) DIR_RIGHT);
     } else if (k > RAND_MAX / 6) {
       // UP_RIGHT a 17%
-      set_dir(rand_dir, (direction_t) DIR_UP_RIGHT);
+      atk_set_dir(rand_dir, (direction_t) DIR_UP_RIGHT);
     } else {
       // UP a 17%
-      set_dir(rand_dir, (direction_t) DIR_UP);
+      atk_set_dir(rand_dir, (direction_t) DIR_UP);
     }
   } else {
     if (k > RAND_MAX / 3) {
       // DOWN_RIGHT a 67%
-      set_dir(rand_dir, (direction_t) DIR_RIGHT);
+      atk_set_dir(rand_dir, (direction_t) DIR_RIGHT);
     } else if (k > RAND_MAX / 6) {
       // RIGHT a 17%
-      set_dir(rand_dir, (direction_t) DIR_DOWN_RIGHT);
+      atk_set_dir(rand_dir, (direction_t) DIR_DOWN_RIGHT);
     } else {
       // DOWN a 17%
-      set_dir(rand_dir, (direction_t) DIR_DOWN);
+      atk_set_dir(rand_dir, (direction_t) DIR_DOWN);
     }
   }
 }
 
-void update_strategy_type(
+void atk_update_strategy_type(
     StrategyType *type, StrategyType *max, bool got_locked_recently) {
   if (got_locked_recently) {
     *type = *max + 1 == INVALID_TYPE ? ZIGZAG : *max + 1;
@@ -197,8 +197,8 @@ void apply_zigzag(
     direction_t *dir, Strategy *s) {
 
   // Treat preferred direction
-  if (!is_same_dir(s->preferred_dir, (direction_t) DIR_STAY)) {
-    set_dir(dir, s->preferred_dir);
+  if (!atk_is_same_dir(s->preferred_dir, (direction_t) DIR_STAY)) {
+    atk_set_dir(dir, s->preferred_dir);
   } else {
     // Resolve random way
     if (s->way == RANDOM) {
@@ -208,14 +208,14 @@ void apply_zigzag(
     // Go the same way with probability 7/8
     if (rand() % 8 != 0) {
       // Keep going
-      set_rand_dir(dir, s->way);
+      atk_set_rand_dir(dir, s->way);
     } else {
       // Change way
       if (s->way == CLOCKWISE) {
-        set_dir(dir, (direction_t) DIR_DOWN_RIGHT);
+        atk_set_dir(dir, (direction_t) DIR_DOWN_RIGHT);
         s->way = COUNTERCLOCKWISE;
       } else {
-        set_dir(dir, (direction_t) DIR_UP_RIGHT);
+        atk_set_dir(dir, (direction_t) DIR_UP_RIGHT);
         s->way = CLOCKWISE;
       }
     }
@@ -225,17 +225,17 @@ void apply_zigzag(
 void apply_vertical(
   direction_t *dir, Strategy *s) {
   // Treat preferred direction
-  if (!is_same_dir(s->preferred_dir, (direction_t) DIR_STAY)) {
-    set_dir(dir, s->preferred_dir);
+  if (!atk_is_same_dir(s->preferred_dir, (direction_t) DIR_STAY)) {
+    atk_set_dir(dir, s->preferred_dir);
   } else {
-    if (is_same_dir(s->forbidden_dir, (direction_t) DIR_UP)) {
-      set_dir(dir, (direction_t) DIR_DOWN);
-    } else if (is_same_dir(s->forbidden_dir, (direction_t) DIR_DOWN)) {
-      set_dir(dir, (direction_t) DIR_UP);
+    if (atk_is_same_dir(s->forbidden_dir, (direction_t) DIR_UP)) {
+      atk_set_dir(dir, (direction_t) DIR_DOWN);
+    } else if (atk_is_same_dir(s->forbidden_dir, (direction_t) DIR_DOWN)) {
+      atk_set_dir(dir, (direction_t) DIR_UP);
     } else if (s->way == CLOCKWISE) {
-      set_dir(dir, (direction_t) DIR_UP);
+      atk_set_dir(dir, (direction_t) DIR_UP);
     } else {
-      set_dir(dir, (direction_t) DIR_DOWN);
+      atk_set_dir(dir, (direction_t) DIR_DOWN);
     }
   }
   s->rounds_left--;
@@ -245,15 +245,15 @@ void apply_triangle(
   direction_t *dir, Strategy *s) {
   if (s->way == CLOCKWISE) {
     if (s->rounds_left > 2) {
-      set_dir(dir, (direction_t) DIR_UP_LEFT);
+      atk_set_dir(dir, (direction_t) DIR_UP_LEFT);
     } else {
-      set_dir(dir, (direction_t) DIR_UP_RIGHT);
+      atk_set_dir(dir, (direction_t) DIR_UP_RIGHT);
     }
   } else {
     if (s->rounds_left > 2) {
-      set_dir(dir, (direction_t) DIR_DOWN_LEFT);
+      atk_set_dir(dir, (direction_t) DIR_DOWN_LEFT);
     } else {
-      set_dir(dir, (direction_t) DIR_DOWN_RIGHT);
+      atk_set_dir(dir, (direction_t) DIR_DOWN_RIGHT);
     }
   }
   s->rounds_left--;
@@ -266,36 +266,36 @@ void apply_square(
   if (is_locked) {
     if (step == 0) {
       if (s->way == CLOCKWISE) {
-        set_dir(dir, (direction_t) DIR_UP);
+        atk_set_dir(dir, (direction_t) DIR_UP);
       } else {
-        set_dir(dir, (direction_t) DIR_DOWN);
+        atk_set_dir(dir, (direction_t) DIR_DOWN);
       }
       step++;
     } else if (step == 1) {
-      set_dir(dir, (direction_t) DIR_RIGHT);
+      atk_set_dir(dir, (direction_t) DIR_RIGHT);
       squares_away--;
       step++;
     } else {
-      set_rand_dir(dir, s->way);
+      atk_set_rand_dir(dir, s->way);
       step = 0;
       s->rounds_left = 0;
     }
   } else {
     if (step == 0) {
-      set_dir(dir, (direction_t) DIR_LEFT);
+      atk_set_dir(dir, (direction_t) DIR_LEFT);
       squares_away++;
     } else if (step == 1) {
       if (s->way == CLOCKWISE) {
-        set_dir(dir, (direction_t) DIR_UP);
+        atk_set_dir(dir, (direction_t) DIR_UP);
       } else {
-        set_dir(dir, (direction_t) DIR_DOWN);
+        atk_set_dir(dir, (direction_t) DIR_DOWN);
       }
     } else {
       if (squares_away > 0) {
-        set_dir(dir, (direction_t) DIR_RIGHT);
+        atk_set_dir(dir, (direction_t) DIR_RIGHT);
         squares_away--;
       } else {
-        set_rand_dir(dir, s->way);
+        atk_set_rand_dir(dir, s->way);
         step = 0;
         s->rounds_left = 0;
       }
@@ -340,7 +340,7 @@ direction_t execute_attacker_strategy(
   // Things to do only in the first round
   if (round == 1) {
     srand(time(NULL));
-    set_pos(&initial_pos, current_pos);
+    atk_set_pos(&initial_pos, current_pos);
   }
 
   // Extract state of the game to meaningful variables
@@ -353,8 +353,7 @@ direction_t execute_attacker_strategy(
   // Spy
   if (is_time_to_spy) {
     position_t rival_pos;
-    set_pos(&rival_pos, get_spy_position(defender_spy));
-    print_pos(rival_pos);
+    atk_set_pos(&rival_pos, get_spy_position(defender_spy));
     already_spied = true;
     int h_diff = (int) current_pos.j - (int) rival_pos.j;
     int v_diff = (int) current_pos.i - (int) rival_pos.i;
@@ -408,7 +407,7 @@ direction_t execute_attacker_strategy(
   if (already_spied) {
     // Expire preferred_dir sometime
     rounds_since_spy++;
-    if (!is_same_dir(preferred_dir, (direction_t) DIR_STAY)
+    if (!atk_is_same_dir(preferred_dir, (direction_t) DIR_STAY)
         && rounds_since_spy == 2) {
       preferred_dir = (direction_t) DIR_STAY;
     }
@@ -431,7 +430,7 @@ direction_t execute_attacker_strategy(
   }
   // Update strategy if we're stuck
   else if (is_locked && strategy_type != SQUARE) {
-    update_strategy_type(&strategy_type, &max_strategy_type, got_locked_recently);
+    atk_update_strategy_type(&strategy_type, &max_strategy_type, got_locked_recently);
     strategy = init_atk_strategies[strategy_type];
     strategy.forbidden_dir = last_dir;
     strategy.preferred_dir = preferred_dir;
@@ -460,13 +459,13 @@ direction_t execute_attacker_strategy(
   }
 
   // Store current position
-  set_pos(&last_pos, current_pos);
+  atk_set_pos(&last_pos, current_pos);
 
   // Store current direction
-  set_dir(&last_dir, dir);
+  atk_set_dir(&last_dir, dir);
 
   // Store movement way (clockwise or counterclockwise)
-  set_way(&way, dir);
+  atk_set_way(&way, dir);
 
   round++;
 
