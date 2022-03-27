@@ -42,7 +42,7 @@ typedef struct strategy Strategy;
 #define INIT_TRIANGLE { "TRIANGLE", 4, DIR_STAY, DIR_STAY, RANDOM }
 #define INIT_SQUARE   { "SQUARE", RAND_MAX, DIR_STAY, DIR_STAY, RANDOM }
 
-const Strategy init_strategies[] = {
+const Strategy init_atk_strategies[] = {
   INIT_ZIGZAG, INIT_VERTICAL, INIT_TRIANGLE, INIT_SQUARE
 };
 
@@ -432,7 +432,7 @@ direction_t execute_attacker_strategy(
   // Update strategy if we're stuck
   else if (is_locked && strategy_type != SQUARE) {
     update_strategy_type(&strategy_type, &max_strategy_type, got_locked_recently);
-    strategy = init_strategies[strategy_type];
+    strategy = init_atk_strategies[strategy_type];
     strategy.forbidden_dir = last_dir;
     strategy.preferred_dir = preferred_dir;
     strategy.way = way == CLOCKWISE ? COUNTERCLOCKWISE : CLOCKWISE;
