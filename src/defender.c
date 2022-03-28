@@ -40,77 +40,20 @@ const Strategy init_def_strategies[] = {
 /*                                    UTIL                                    */
 /*----------------------------------------------------------------------------*/
 
-void def_print_dir(direction_t dir) {
-  switch (dir.i) {
-  case -1:
-    switch (dir.j) {
-      case -1:
-        printf("up left\n");
-        break;
-      case 0:
-        printf("up\n");
-        break;
-      case 1:
-        printf("up right\n");
-        break;
-    }
-    break;
-  case 0:
-    switch (dir.j) {
-      case -1:
-        printf("left\n");
-        break;
-      case 0:
-        printf("stay\n");
-        break;
-      case 1:
-        printf("right\n");
-        break;
-    }
-    break;
-  case 1:
-    switch (dir.j) {
-      case -1:
-        printf("down left\n");
-        break;
-      case 0:
-        printf("down\n");
-        break;
-      case 1:
-        printf("down right\n");
-        break;
-    }
-    break;
-  default:
-    printf("none\n");
-  }
-}
+// Functions defined elsewhere
+extern void print_dir(direction_t dir);
+extern bool is_same_dir(direction_t dir_1, direction_t dir_2);
+extern void set_pos(position_t *target_pos, position_t source_pos);
 
-void def_print_strategy(Strategy *s) {
+void print_def(Strategy *s) {
   printf("--------------------\n");
   printf("[STRATEGY] %s\n", s->name);
   printf("%d rounds left\n", s->rounds_left);
   printf("%d amplitude\n", s->amplitude);
   printf("%d step\n", s->step);
   printf("dir: ");
-  def_print_dir(s->dir);
+  print_dir(s->dir);
   printf("--------------------\n");
-}
-
-/*----------------------------------------------------------------------------*/
-/*                            PRIVATE FUNCTIONS                               */
-/*----------------------------------------------------------------------------*/
-
-bool def_is_same_dir(direction_t dir_1, direction_t dir_2) {
-  if (dir_1.i == dir_2.i && dir_1.j == dir_2.j) {
-    return true;
-  }
-  return false;
-}
-
-void def_set_pos(position_t *target_pos, position_t source_pos) {
-  target_pos->i = source_pos.i;
-  target_pos->j = source_pos.j;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -128,18 +71,18 @@ void apply_align(direction_t *dir, Strategy *s) {
 
 void apply_less(direction_t *dir, Strategy *s) {
   if (s->step % 2 != 0) { // Change vertical direction in odd steps
-    if (def_is_same_dir(s->dir, (direction_t) DIR_UP_RIGHT)
-        || def_is_same_dir(s->dir, (direction_t) DIR_UP)) {
+    if (is_same_dir(s->dir, (direction_t) DIR_UP_RIGHT)
+        || is_same_dir(s->dir, (direction_t) DIR_UP)) {
       s->dir = (direction_t) DIR_DOWN_LEFT;
     } else {
       s->dir = (direction_t) DIR_UP_LEFT;
     }
   } else { // Change horizontal direction in even steps
-    if (def_is_same_dir(s->dir, (direction_t) DIR_UP)) {
+    if (is_same_dir(s->dir, (direction_t) DIR_UP)) {
       s->dir = (direction_t) DIR_UP;
-    } else if (def_is_same_dir(s->dir, (direction_t) DIR_DOWN)) {
+    } else if (is_same_dir(s->dir, (direction_t) DIR_DOWN)) {
       s->dir = (direction_t) DIR_DOWN;
-    } else if (def_is_same_dir(s->dir, (direction_t) DIR_UP_LEFT)) {
+    } else if (is_same_dir(s->dir, (direction_t) DIR_UP_LEFT)) {
       s->dir = (direction_t) DIR_UP_RIGHT;
     } else {
       s->dir = (direction_t) DIR_DOWN_RIGHT;
@@ -184,7 +127,7 @@ direction_t execute_defender_strategy(
 
   // Things to do only in the first round
   if (round == 1) {
-    def_set_pos(&initial_pos, current_pos);
+    set_pos(&initial_pos, current_pos);
   }
 
   // Extract state of the game to meaningful variables
@@ -198,7 +141,7 @@ direction_t execute_defender_strategy(
 
   // Spy
   if (is_time_to_spy) {
-    def_set_pos(&rival_pos, get_spy_position(attacker_spy));
+    set_pos(&rival_pos, get_spy_position(attacker_spy));
     already_spied = true;
     int v_diff = (int) current_pos.i - (int) rival_pos.i;
 
@@ -238,9 +181,9 @@ direction_t execute_defender_strategy(
       strategy_type = ALIGN;
       strategy = (Strategy) INIT_ALIGN;
       strategy.rounds_left = 2;
-      if (def_is_same_dir(last_dir, (direction_t) DIR_UP)
-          || def_is_same_dir(last_dir, (direction_t) DIR_UP_RIGHT)
-          || def_is_same_dir(last_dir, (direction_t) DIR_UP_LEFT)) {
+      if (is_same_dir(last_dir, (direction_t) DIR_UP)
+          || is_same_dir(last_dir, (direction_t) DIR_UP_RIGHT)
+          || is_same_dir(last_dir, (direction_t) DIR_UP_LEFT)) {
         strategy.dir = (direction_t) DIR_DOWN;
       } else {
         strategy.dir = (direction_t) DIR_UP;
@@ -268,7 +211,7 @@ direction_t execute_defender_strategy(
   }
 
   // Store current position
-  def_set_pos(&last_pos, current_pos);
+  set_pos(&last_pos, current_pos);
 
   // Store current direction
   last_dir = dir;
